@@ -35,7 +35,7 @@ namespace Client
                 }
             } else
             {
-                Console.WriteLine("The IP address invalid.");
+                Console.WriteLine("The IP address is invalid.");
             }
 
             // Write somthing when there is nothing more to do.
