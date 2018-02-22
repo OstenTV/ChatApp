@@ -26,8 +26,9 @@ namespace Client
                 {
                     Console.WriteLine("Recieved reply from server.");
 
+                    // Start the chat session.
                     Console.WriteLine("Connectiong to server. . .");
-                    CreateConnection(IP);
+                    ChatJoin(IP);
                 } else
                 {
                     Console.WriteLine("Ping request timed out.");
@@ -96,9 +97,9 @@ namespace Client
             }
             return pingable;
         }
-        static void CreateConnection(string IP)
+        static void ChatJoin(string IP)
         {
-            
+            // We will create the connection here.
         }
     }
 }
