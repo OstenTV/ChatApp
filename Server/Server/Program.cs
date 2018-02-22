@@ -15,7 +15,7 @@ namespace Server
             Console.WriteLine("Starting ChatApp server. . .");
 
             // Define which interface to use and what port to listen on.
-            System.Net.IPAddress serverAddress = System.Net.IPAddress.Parse("127.0.0.1");
+            System.Net.IPAddress serverAddress = System.Net.IPAddress.Parse("0.0.0.0");
             int port = 4444;
 
             // Create the listener.

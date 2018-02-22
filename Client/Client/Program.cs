@@ -147,6 +147,8 @@ namespace Client
                 byte[] join = Encoding.ASCII.GetBytes("A user connected to the server.");
                 inStream.Write(join, 0, join.Length);
 
+                Console.WriteLine("You can now send a message.");
+
                 while (true)
                 {
                     string message = Console.ReadLine();
