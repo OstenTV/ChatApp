@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Net.NetworkInformation;
 
 namespace Client
 {
@@ -17,25 +18,27 @@ namespace Client
             // Verify if the IP address is valid.
             if (VerifyIpAddr(IP))
             {
-                Console.WriteLine("Valid IP address");
+                Console.WriteLine("The IP address is valid.");
 
                 // Verify the connection to the IP address.
+                Console.WriteLine("Pinging the server. . .");
                 if (CheckConnection(IP))
                 {
-                    Console.WriteLine("successfully established a connection to " + IP);
+                    Console.WriteLine("Recieved reply from server.");
 
-                    // Make the ChatApp connection here.
+                    Console.WriteLine("Connectiong to server. . .");
+                    CreateConnection(IP);
                 } else
                 {
-                    Console.WriteLine("Cannot establish a connection to " + IP);
+                    Console.WriteLine("Ping request timed out.");
                 }
             } else
             {
-                Console.WriteLine("Invalid IP address.");
+                Console.WriteLine("The IP address invalid.");
             }
 
             // Write somthing when there is nothing more to do.
-            Console.Write("Program has ended.");
+            Console.Write("There is nothing else to do now.");
             Console.ReadLine();
         }
         public static bool VerifyIpAddr(string IP)
@@ -44,19 +47,29 @@ namespace Client
             string[] IP_array = IP.Split(splitter, StringSplitOptions.RemoveEmptyEntries);
             int scanned_sections = 0;
 
+            Console.WriteLine("Scanning IP address");
+
             if (IP_array.Length == 4)
             {
                 foreach (var a in IP_array)
                 {
-                    // TODO: Verify if a can be converted to an int32.
-                    int b = Convert.ToInt32(a);
+                    int b;
+                    try
+                    {
+                        b = Convert.ToInt32(a);
+                    }
+                    catch(FormatException)
+                    {
+                        Console.WriteLine("\""+ a + "\" at section " + scanned_sections + " is not an integer.");
+                        return false;
+                    }
 
                     Console.WriteLine("Scanning section: " + scanned_sections + ".");
 
                     // Check if the IP sections are inbetween 0 and 255.
                     if (b > 255 || b < 0)
                     {
-                        Console.WriteLine(b + " at section " + scanned_sections + " was invalid.");
+                        Console.WriteLine(b + " at section " + scanned_sections + " is not inbetween 0 and 255.");
                         return false;
                     }
                     scanned_sections++;
@@ -64,14 +77,28 @@ namespace Client
                 return true;
             } else
             {
-                Console.WriteLine("The IP address was not 4 sections in total.");
+                Console.WriteLine("The IP address is not 4 sections long.");
                 return false;
             }
         }
         static bool CheckConnection(string IP)
         {
-            // This is temporary.
-            return true;
+            bool pingable = false;
+            Ping pinger = new Ping();
+            try
+            {
+                PingReply reply = pinger.Send(IP);
+                pingable = reply.Status == IPStatus.Success;
+            }
+            catch (PingException)
+            {
+                // Discard PingExceptions and return false;
+            }
+            return pingable;
+        }
+        static void CreateConnection(string IP)
+        {
+            
         }
     }
 }
