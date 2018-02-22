@@ -45,6 +45,7 @@ namespace Client
             } else
             {
                 Console.WriteLine("The IP address is invalid.");
+                Console.WriteLine("Please note that: hostnames and domains are not supported yet.");
             }
 
             // Write somthing when there is nothing else to do.
