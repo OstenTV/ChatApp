@@ -5,11 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Threading;
 
 namespace Client
 {
     class Program
     {
+
         static void Main(string[] args)
         {
             Console.WriteLine("Starting ChatApp client. . .");
@@ -36,21 +38,26 @@ namespace Client
                     {
                         // Start the chat session.
                         Console.WriteLine("Connectiong to server. . .");
-                        StartChatSession(IP, ConvertPortToInt(port));
+
+                        Thread sendMessages = new Thread(() => SendMessages(IP, ConvertPortToInt(port)));
+                        sendMessages.Start();
+                        
+                    } else
+                    {
+                        End();
                     }
                 } else
                 {
                     Console.WriteLine("Ping request timed out.");
+                    End();
                 }
             } else
             {
                 Console.WriteLine("The IP address is invalid.");
                 Console.WriteLine("Please note that: hostnames and domains are not supported yet.");
-            }
 
-            // Write somthing when there is nothing else to do.
-            Console.Write("There is nothing else to do now.");
-            Console.ReadLine();
+                End();
+            }
         }
         static bool VerifyIpAddr(string IP)
         {
@@ -131,9 +138,14 @@ namespace Client
             {
                 return false;
             }
-            return pingable;
+            catch (System.ArgumentException)
+            {
+                Console.WriteLine("You cannot connect to all interfaces at once.");
+                return false;
+            }
+            return true;
         }
-        static void StartChatSession(string IP, int port)
+        public static void SendMessages(string IP, int port)
         {
             TcpClient client = new TcpClient();
             
@@ -143,9 +155,9 @@ namespace Client
                 Console.WriteLine("Connected to ChatApp server.");
 
                 NetworkStream inStream = client.GetStream();
-                
-                byte[] join = Encoding.ASCII.GetBytes("A user connected to the server.");
-                inStream.Write(join, 0, join.Length);
+
+                Thread recieveMessages = new Thread(() => RecieveMessages(client, inStream));
+                recieveMessages.Start();
 
                 Console.WriteLine("You can now send a message.");
 
@@ -159,11 +171,38 @@ namespace Client
             catch(System.Net.Sockets.SocketException)
             {
                 Console.WriteLine("Unable to connect to ChatApp server at: " + IP + ":" + port);
+                End();
             }
             catch(System.IO.IOException)
             {
-
+                Console.WriteLine("ChatApp server closed unexpectedly.");
+                End();
             }
+        }
+        static void RecieveMessages(TcpClient client, NetworkStream inStream)
+        {
+            byte[] data = new byte[client.ReceiveBufferSize];
+
+            try
+            {
+                while (true)
+                {
+                    int bytesRead = inStream.Read(data, 0, System.Convert.ToInt32(client.ReceiveBufferSize));
+                    string s_data = Encoding.ASCII.GetString(data, 0, bytesRead);
+
+                    Console.WriteLine(s_data);
+                }
+            }
+            catch (System.IO.IOException)
+            {
+                
+            }
+        }
+        static void End()
+        {
+            // Write somthing when there is nothing else to do.
+            Console.Write("There is nothing else to do now.");
+            Console.ReadLine();
         }
     }
 }
