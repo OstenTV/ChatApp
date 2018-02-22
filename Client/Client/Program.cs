@@ -36,7 +36,7 @@ namespace Client
                     {
                         // Start the chat session.
                         Console.WriteLine("Connectiong to server. . .");
-                        ChatJoin(IP, ConvertPortToInt(port));
+                        StartChatSession(IP, ConvertPortToInt(port));
                     }
                 } else
                 {
@@ -52,7 +52,7 @@ namespace Client
             Console.Write("There is nothing else to do now.");
             Console.ReadLine();
         }
-        public static bool VerifyIpAddr(string IP)
+        static bool VerifyIpAddr(string IP)
         {
             string[] splitter = { "." };
             string[] IP_array = IP.Split(splitter, StringSplitOptions.RemoveEmptyEntries);
@@ -92,7 +92,7 @@ namespace Client
                 return false;
             }
         }
-        public static int ConvertPortToInt(string port)
+        static int ConvertPortToInt(string port)
         {
             int portInt;
             try
@@ -105,7 +105,7 @@ namespace Client
             }
             return portInt;
         }
-        public static bool VerifyPortRange(int port)
+        static bool VerifyPortRange(int port)
         {
             Console.WriteLine("Verifying port range. . .");
             
@@ -133,19 +133,34 @@ namespace Client
             }
             return pingable;
         }
-        static void ChatJoin(string IP, int port)
+        static void StartChatSession(string IP, int port)
         {
             TcpClient client = new TcpClient();
             
             try
             {
                 client.Connect(IP, port);
+                Console.WriteLine("Connected to ChatApp server.");
 
+                NetworkStream inStream = client.GetStream();
+                
+                byte[] join = Encoding.ASCII.GetBytes("A user connected to the server.");
+                inStream.Write(join, 0, join.Length);
 
+                while (true)
+                {
+                    string message = Console.ReadLine();
+                    byte[] data = Encoding.ASCII.GetBytes(message);
+                    inStream.Write(data, 0, data.Length);
+                }
             }
             catch(System.Net.Sockets.SocketException)
             {
                 Console.WriteLine("Unable to connect to ChatApp server at: " + IP + ":" + port);
+            }
+            catch(System.IO.IOException)
+            {
+
             }
         }
     }

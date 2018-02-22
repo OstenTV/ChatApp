@@ -26,10 +26,25 @@ namespace Server
             Console.WriteLine("Starting listener. . .");
             listener.Start();
             Console.WriteLine("Listening on: " + serverAddress + ":" + port);
-
+            
             TcpClient client = listener.AcceptTcpClient();
+            NetworkStream inStream = client.GetStream();
+            byte[] data = new byte[client.ReceiveBufferSize];
 
+            try
+            {
+                while (true)
+                {
+                    int bytesRead = inStream.Read(data, 0, System.Convert.ToInt32(client.ReceiveBufferSize));
+                    string s_data = Encoding.ASCII.GetString(data, 0, bytesRead);
 
+                    Console.WriteLine(s_data);
+                }
+            }
+            catch (System.IO.IOException)
+            {
+                listener.Stop();
+            }
         }
     }
 }
