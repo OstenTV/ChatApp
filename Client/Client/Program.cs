@@ -39,8 +39,7 @@ namespace Client
                         // Start the chat session.
                         Console.WriteLine("Connectiong to server. . .");
 
-                        Thread sendMessages = new Thread(() => SendMessages(IP, ConvertPortToInt(port)));
-                        sendMessages.Start();
+                        ChatJoin(IP, ConvertPortToInt(port));
                         
                     } else
                     {
@@ -145,10 +144,10 @@ namespace Client
             }
             return true;
         }
-        public static void SendMessages(string IP, int port)
+        static void ChatJoin(string IP, int port)
         {
             TcpClient client = new TcpClient();
-            
+
             try
             {
                 client.Connect(IP, port);
@@ -156,27 +155,37 @@ namespace Client
 
                 NetworkStream inStream = client.GetStream();
 
-                Thread recieveMessages = new Thread(() => RecieveMessages(client, inStream));
-                recieveMessages.Start();
-
-                Console.WriteLine("You can now send a message.");
-
-                while (true)
-                {
-                    string message = Console.ReadLine();
-                    byte[] data = Encoding.ASCII.GetBytes(message);
-                    inStream.Write(data, 0, data.Length);
-                }
+                Thread sendMessages = new Thread(() => SendMessages(client, inStream));
+                Thread recieveMessahes = new Thread(() => RecieveMessages(client, inStream));
+                sendMessages.Start();
+                recieveMessahes.Start();
             }
-            catch(System.Net.Sockets.SocketException)
+            catch (System.Net.Sockets.SocketException)
             {
                 Console.WriteLine("Unable to connect to ChatApp server at: " + IP + ":" + port);
                 End();
             }
-            catch(System.IO.IOException)
+        }
+        static void SendMessages(TcpClient client, NetworkStream inStream)
+        {
+            byte[] data = new byte[client.ReceiveBufferSize];
+
+            try
             {
-                Console.WriteLine("ChatApp server closed unexpectedly.");
-                End();
+                while (true)
+                {
+                    string message = Console.ReadLine();
+                    data = Encoding.ASCII.GetBytes("Client: " + message);
+                    inStream.Write(data, 0, data.Length);
+                }
+            }
+            catch (System.Net.Sockets.SocketException)
+            {
+
+            }
+            catch (System.IO.IOException)
+            {
+
             }
         }
         static void RecieveMessages(TcpClient client, NetworkStream inStream)
@@ -195,7 +204,8 @@ namespace Client
             }
             catch (System.IO.IOException)
             {
-                
+                Console.WriteLine("ChatApp server closed unexpectedly.");
+                End();
             }
         }
         static void End()

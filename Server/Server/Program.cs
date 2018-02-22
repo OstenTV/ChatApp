@@ -11,7 +11,7 @@ namespace Server
 {
     class Program
     {
-        static void Main(string[] args)
+        public static void Main()
         {
             Console.WriteLine("Starting ChatApp server. . .");
             // Define which interface to use and what port to listen on.
@@ -29,11 +29,40 @@ namespace Server
 
             TcpClient client = listener.AcceptTcpClient();
             NetworkStream inStream = client.GetStream();
-            byte[] data = new byte[client.ReceiveBufferSize];
 
             Thread sendMessages = new Thread(() => SendMessages(client, inStream));
+            Thread recieveMessahes = new Thread(() => RecieveMessages(client, inStream));
             sendMessages.Start();
-            
+            recieveMessahes.Start();
+        }
+        static void SendMessages(TcpClient client, NetworkStream inStream)
+        {
+            byte[] data = new byte[client.ReceiveBufferSize];
+
+            try
+            {
+                while (true)
+                {
+                    string message = Console.ReadLine();
+                    data = Encoding.ASCII.GetBytes("Server: " + message);
+                    inStream.Write(data, 0, data.Length);
+                }
+            }
+            catch (System.Net.Sockets.SocketException)
+            {
+                
+            }
+            catch (System.IO.IOException)
+            {
+                
+            }
+        }
+        static void RecieveMessages(TcpClient client, NetworkStream inStream)
+        {
+            byte[] data = new byte[client.ReceiveBufferSize];
+
+            Console.WriteLine("A user has connected to the server.");
+
             try
             {
                 while (true)
@@ -46,27 +75,8 @@ namespace Server
             }
             catch (System.IO.IOException)
             {
-                listener.Stop();
-            }
-        }
-        static void SendMessages(TcpClient client, NetworkStream inStream)
-        {
-            try
-            {
-                while (true)
-                {
-                    string message = Console.ReadLine();
-                    byte[] data = Encoding.ASCII.GetBytes(message);
-                    inStream.Write(data, 0, data.Length);
-                }
-            }
-            catch (System.Net.Sockets.SocketException)
-            {
-                
-            }
-            catch (System.IO.IOException)
-            {
-                
+                Console.WriteLine("I don't know what to do when a user disconnects. Server is shutting down.");
+                Console.ReadKey();
             }
         }
     }
