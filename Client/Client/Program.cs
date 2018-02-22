@@ -42,35 +42,35 @@ namespace Client
         {
             string[] splitter = { "." };
             string[] IP_array = IP.Split(splitter, StringSplitOptions.RemoveEmptyEntries);
-            int valid_sections = 0;
+            int scanned_sections = 0;
 
             if (IP_array.Length == 4)
             {
                 foreach (var a in IP_array)
                 {
-                    // TODO: Verify if b can be converted to an int32.
+                    // TODO: Verify if a can be converted to an int32.
                     int b = Convert.ToInt32(a);
 
-                    if (b <= 255 && b >= 0)
-                    {
-                        valid_sections++;
-                    }
-                }
+                    Console.WriteLine("Scanning section: " + scanned_sections + ".");
 
-                if (valid_sections == 4)
-                {
-                    return true;
-                } else
-                {
-                    return false;
+                    // Check if the IP sections are inbetween 0 and 255.
+                    if (b > 255 || b < 0)
+                    {
+                        Console.WriteLine(b + " at section " + scanned_sections + " was invalid.");
+                        return false;
+                    }
+                    scanned_sections++;
                 }
+                return true;
             } else
             {
+                Console.WriteLine("The IP address was not 4 sections in total.");
                 return false;
             }
         }
         static bool CheckConnection(string IP)
         {
+            // This is temporary.
             return true;
         }
     }
