@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Net.NetworkInformation;
+using System.Net.Sockets;
 
 namespace Client
 {
@@ -11,9 +12,13 @@ namespace Client
     {
         static void Main(string[] args)
         {
-            // Get the IP address from the user.
+            Console.WriteLine("Starting ChatApp client. . .");
+
+            // Get the IP address and port from the user.
             Console.Write("Please enter a ChatApp server IP address: ");
             string IP = Console.ReadLine();
+            Console.Write("And now the port please: ");
+            string port = Console.ReadLine();
 
             // Verify if the IP address is valid.
             if (VerifyIpAddr(IP))
@@ -22,13 +27,17 @@ namespace Client
 
                 // Verify the connection to the IP address.
                 Console.WriteLine("Pinging the server. . .");
-                if (CheckConnection(IP))
+                if (PingServer(IP))
                 {
                     Console.WriteLine("Recieved reply from server.");
 
-                    // Start the chat session.
-                    Console.WriteLine("Connectiong to server. . .");
-                    ChatJoin(IP);
+                    // Verify the port is valid.
+                    if (VerifyPort(port))
+                    {
+                        // Start the chat session.
+                        Console.WriteLine("Connectiong to server. . .");
+                        ChatJoin(IP);
+                    }
                 } else
                 {
                     Console.WriteLine("Ping request timed out.");
@@ -82,7 +91,31 @@ namespace Client
                 return false;
             }
         }
-        static bool CheckConnection(string IP)
+        public static bool VerifyPort(string port)
+        {
+            Console.WriteLine("Verifying port. . .");
+
+            int portInt;
+            try
+            {
+                portInt = Convert.ToInt32(port);
+            }
+            catch (FormatException)
+            {
+                Console.WriteLine(port + " is not a valid port number.");
+                return false;
+            }
+
+            if (portInt < 0 || portInt > 65535)
+            {
+                Console.WriteLine(portInt + " is not inbetween 0 and 65535.");
+                return false;
+            }
+
+            Console.WriteLine("Port number is valid.");
+            return true;
+        }
+        static bool PingServer(string IP)
         {
             bool pingable = false;
             Ping pinger = new Ping();
