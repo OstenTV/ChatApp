@@ -32,11 +32,11 @@ namespace Client
                     Console.WriteLine("Recieved reply from server.");
 
                     // Verify the port is valid.
-                    if (VerifyPort(port))
+                    if (VerifyPortRange(ConvertPortToInt(port)))
                     {
                         // Start the chat session.
                         Console.WriteLine("Connectiong to server. . .");
-                        ChatJoin(IP);
+                        ChatJoin(IP, ConvertPortToInt(port));
                     }
                 } else
                 {
@@ -47,7 +47,7 @@ namespace Client
                 Console.WriteLine("The IP address is invalid.");
             }
 
-            // Write somthing when there is nothing more to do.
+            // Write somthing when there is nothing else to do.
             Console.Write("There is nothing else to do now.");
             Console.ReadLine();
         }
@@ -91,10 +91,8 @@ namespace Client
                 return false;
             }
         }
-        public static bool VerifyPort(string port)
+        public static int ConvertPortToInt(string port)
         {
-            Console.WriteLine("Verifying port. . .");
-
             int portInt;
             try
             {
@@ -102,13 +100,17 @@ namespace Client
             }
             catch (FormatException)
             {
-                Console.WriteLine(port + " is not a valid port number.");
-                return false;
+                return -1;
             }
-
-            if (portInt < 0 || portInt > 65535)
+            return portInt;
+        }
+        public static bool VerifyPortRange(int port)
+        {
+            Console.WriteLine("Verifying port range. . .");
+            
+            if (port < 0 || port > 65535)
             {
-                Console.WriteLine(portInt + " is not inbetween 0 and 65535.");
+                Console.WriteLine("port is not inbetween 0 and 65535.");
                 return false;
             }
 
@@ -126,13 +128,24 @@ namespace Client
             }
             catch (PingException)
             {
-                // Discard PingExceptions and return false;
+                return false;
             }
             return pingable;
         }
-        static void ChatJoin(string IP)
+        static void ChatJoin(string IP, int port)
         {
-            // We will create the connection here.
+            TcpClient client = new TcpClient();
+            
+            try
+            {
+                client.Connect(IP, port);
+
+
+            }
+            catch(System.Net.Sockets.SocketException)
+            {
+                Console.WriteLine("Unable to connect to ChatApp server at: " + IP + ":" + port);
+            }
         }
     }
 }
