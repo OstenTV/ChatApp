@@ -7,23 +7,25 @@
     <ProjectGuid>{2552EC74-EE97-42D4-8436-76329DE5C0E1}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>Client</RootNamespace>
-    <AssemblyName>Client</AssemblyName>
+    <AssemblyName>ChatApp Client</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
-    <PublishUrl>C:\Users\Bruger\Desktop\Deploy\Client\</PublishUrl>
+    <IsWebBootstrapper>true</IsWebBootstrapper>
+    <PublishUrl>C:\Users\Bruger\Desktop\ChatApp\ChatApp Client\</PublishUrl>
     <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
+    <InstallFrom>Web</InstallFrom>
+    <UpdateEnabled>true</UpdateEnabled>
     <UpdateMode>Foreground</UpdateMode>
     <UpdateInterval>7</UpdateInterval>
     <UpdateIntervalUnits>Days</UpdateIntervalUnits>
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
+    <InstallUrl>http://ftpp.ostentv.dk:8011/GitHub/ChatApp/ChatApp%2520Client/</InstallUrl>
+    <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>4</ApplicationRevision>
+    <ApplicationRevision>3</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
