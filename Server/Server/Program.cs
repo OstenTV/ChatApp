@@ -30,10 +30,22 @@ namespace Server
             TcpClient client = listener.AcceptTcpClient();
             NetworkStream inStream = client.GetStream();
 
+            ToggleThreads(true, client, inStream);
+        }
+        public static void ToggleThreads(bool toggle, TcpClient client, NetworkStream inStream)
+        {
             Thread sendMessages = new Thread(() => SendMessages(client, inStream));
             Thread recieveMessahes = new Thread(() => RecieveMessages(client, inStream));
-            sendMessages.Start();
-            recieveMessahes.Start();
+
+            if (toggle)
+            {
+                sendMessages.Start();
+                recieveMessahes.Start();
+            } else if (!toggle)
+            {
+                sendMessages.Abort();
+                recieveMessahes.Abort();
+            }
         }
         static void SendMessages(TcpClient client, NetworkStream inStream)
         {
@@ -75,6 +87,7 @@ namespace Server
             }
             catch (System.IO.IOException)
             {
+                ToggleThreads(false, client, inStream);
                 Console.WriteLine("I don't know what to do when a user disconnects. Server is shutting down.");
                 Console.ReadKey();
             }
