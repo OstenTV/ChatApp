@@ -27,30 +27,29 @@ namespace Server
             listener.Start();
             Console.WriteLine("Listening on: " + serverAddress + ":" + port);
 
-            TcpClient client = listener.AcceptTcpClient();
-            NetworkStream inStream = client.GetStream();
-
-            ToggleThreads(true, client, inStream);
+            GetNewStream(listener);
         }
-        public static void ToggleThreads(bool toggle, TcpClient client, NetworkStream inStream)
+        public static void ToggleThreads(bool toggle, TcpClient client, NetworkStream inStream, TcpListener listener)
         {
-            Thread sendMessages = new Thread(() => SendMessages(client, inStream));
-            Thread recieveMessahes = new Thread(() => RecieveMessages(client, inStream));
+            Thread sendMessages = new Thread(() => SendMessages(client, inStream, listener));
+            Thread recieveMessages = new Thread(() => RecieveMessages(client, inStream, listener));
 
+            //Toggle the threads.
             if (toggle)
             {
                 sendMessages.Start();
-                recieveMessahes.Start();
+                recieveMessages.Start();
             } else if (!toggle)
             {
                 sendMessages.Abort();
-                recieveMessahes.Abort();
+                recieveMessages.Abort();
             }
         }
-        static void SendMessages(TcpClient client, NetworkStream inStream)
+        static void SendMessages(TcpClient client, NetworkStream inStream, TcpListener listener)
         {
             byte[] data = new byte[client.ReceiveBufferSize];
 
+            //start sending messages.
             try
             {
                 while (true)
@@ -60,6 +59,7 @@ namespace Server
                     inStream.Write(data, 0, data.Length);
                 }
             }
+            //I don't remember what these exceptions are...
             catch (System.Net.Sockets.SocketException)
             {
                 
@@ -69,12 +69,13 @@ namespace Server
                 
             }
         }
-        static void RecieveMessages(TcpClient client, NetworkStream inStream)
+        static void RecieveMessages(TcpClient client, NetworkStream inStream, TcpListener listener)
         {
             byte[] data = new byte[client.ReceiveBufferSize];
 
             Console.WriteLine("A user has connected to the server.");
 
+            //Start recieving messages.
             try
             {
                 while (true)
@@ -87,10 +88,21 @@ namespace Server
             }
             catch (System.IO.IOException)
             {
-                ToggleThreads(false, client, inStream);
-                Console.WriteLine("I don't know what to do when a user disconnects. Server is shutting down.");
-                Console.ReadKey();
+                //Handles user disconnect
+                Console.WriteLine("A user has disconnected from the server.");
+
+                ToggleThreads(false, client, inStream, listener);
+                GetNewStream(listener);
             }
+        }
+        static void GetNewStream(TcpListener listener)
+        {
+            //Accept a new connection.
+            TcpClient client = listener.AcceptTcpClient();
+            NetworkStream inStream = client.GetStream();
+
+            //start the threads.
+            ToggleThreads(true, client, inStream, listener);
         }
     }
 }
