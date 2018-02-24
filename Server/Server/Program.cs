@@ -27,7 +27,8 @@ namespace Server
             listener.Start();
             Console.WriteLine("Listening on: " + serverAddress + ":" + port);
 
-            GetNewStream(listener);
+            Thread getNewStream = new Thread(() => GetNewStream(listener));
+            getNewStream.Start();
         }
         public static void ToggleThreads(bool toggle, TcpClient client, NetworkStream inStream, TcpListener listener)
         {
@@ -73,8 +74,6 @@ namespace Server
         {
             byte[] data = new byte[client.ReceiveBufferSize];
 
-            Console.WriteLine("A user has connected to the server.");
-
             //Start recieving messages.
             try
             {
@@ -90,19 +89,20 @@ namespace Server
             {
                 //Handles user disconnect
                 Console.WriteLine("A user has disconnected from the server.");
-
-                ToggleThreads(false, client, inStream, listener);
-                GetNewStream(listener);
             }
         }
         static void GetNewStream(TcpListener listener)
         {
-            //Accept a new connection.
-            TcpClient client = listener.AcceptTcpClient();
-            NetworkStream inStream = client.GetStream();
+            while (true)
+            {
+                //Accept a new connection.
+                TcpClient client = listener.AcceptTcpClient();
+                NetworkStream inStream = client.GetStream();
 
-            //start the threads.
-            ToggleThreads(true, client, inStream, listener);
+                Console.WriteLine("A user has connected to the server.");
+                //start the threads.
+                ToggleThreads(true, client, inStream, listener);
+            }
         }
     }
 }
